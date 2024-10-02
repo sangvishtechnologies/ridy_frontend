@@ -1,0 +1,18 @@
+query RidersList(
+  $filter: RiderFilter
+  $paging: OffsetPaging
+  $sorting: [RiderSort!]
+) {
+  riders(filter: $filter, paging: $paging, sorting: $sorting) {
+    nodes {
+      id
+      firstName
+      lastName
+      status
+      gender
+      mobileNumber
+      registrationTimestamp
+    }
+    totalCount
+  }
+}

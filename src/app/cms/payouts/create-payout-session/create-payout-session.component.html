@@ -1,0 +1,43 @@
+<nz-page-header [nzGhost]="false" nzBackIcon nzTitle="New Payout session"
+    nzSubtitle="Create a payout session using filters below" class="max-w-2xl" style="margin: auto;">
+    <nz-page-header-extra>
+        <button nz-button nzType="primary" (click)="submitForm()">Create</button>
+    </nz-page-header-extra>
+    <nz-page-header-content *ngIf="(query | async) as data">
+        <form nz-form [formGroup]="form" (ngSubmit)="submitForm()">
+            <nz-form-item>
+                <nz-form-label nzRequired nzFor="minimumAmount">Minimum Amount</nz-form-label>
+                <nz-form-control>
+                    <nz-slider nzMin="0" nzMax="10000" formControlName="minimumAmount"></nz-slider>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label nzFor="currency" nzRequired>Currency</nz-form-label>
+                <nz-form-control required>
+                    <nz-select class="phone-select" formControlName="currency">
+                        <nz-option *ngFor="let currency of data.data.supportedCurrencies" [nzLabel]="currency"
+                            [nzValue]="currency"></nz-option>
+                    </nz-select>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label nzFor="payoutMethodIds" nzRequired="">Payout Methods</nz-form-label>
+                <nz-form-control>
+                    <nz-select formControlName="payoutMethodIds" nzMode="multiple"
+                        nzPlaceHolder="Please select at least one" required>
+                        <nz-option *ngFor="let method of data.data.payoutMethods" [nzLabel]="method.name"
+                            [nzValue]="method.id"></nz-option>
+                    </nz-select>
+                </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+                <nz-form-label nzFor="description">Description</nz-form-label>
+                <nz-form-control>
+                    <textarea nz-input formControlName="description" id="description" rows="4"></textarea>
+                </nz-form-control>
+            </nz-form-item>
+
+        </form>
+    </nz-page-header-content>
+
+</nz-page-header>

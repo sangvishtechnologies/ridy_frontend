@@ -1,0 +1,31 @@
+query ViewSMSProvider($id: ID!) {
+  smsProvider(id: $id) {
+    id
+    name
+    type
+    isDefault
+    authToken
+    accountId
+    fromNumber
+    verificationTemplate
+    smsType
+  }
+}
+
+mutation CreateSMSProvider($input: SMSProviderInput!) {
+  createOneSMSProvider(input: { sMSProvider: $input }) {
+    id
+  }
+}
+
+mutation UpdateSMSProvider($id: ID!, $input: SMSProviderInput!) {
+  updateOneSMSProvider(input: { id: $id, update: $input }) {
+    id
+  }
+}
+
+mutation MarkSMSProviderAsDefault($id: ID!) {
+  markSMSProviderAsDefault(id: $id) {
+    id
+  }
+}

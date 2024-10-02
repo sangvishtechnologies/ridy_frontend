@@ -1,0 +1,207 @@
+<nz-page-header [nzGhost]="false" nzBackIcon nzTitle="Payout Session #{{id}}"
+    nzSubtitle="Create a payout session using filters below" class="max-w-2xl" style="margin: auto;">
+    <nz-page-header-extra>
+        <nz-space>
+            <button nz-button nz-dropdown [nzDropdownMenu]="menu4">
+                {{'driver.profile.changeStatus' | translate}}
+                <i nz-icon nzType="down"></i>
+            </button>
+            <nz-dropdown-menu #menu4="nzDropdownMenu">
+                <ul nz-menu>
+                    <li nz-menu-item (click)='changeStatus(payoutSessionStatus.Pending)'>Pending</li>
+                    <li nz-menu-item (click)="changeStatus(payoutSessionStatus.Paid)">Paid</li>
+                    <li nz-menu-item (click)="changeStatus(payoutSessionStatus.Cancelled)">Canceled</li>
+                    <li nz-menu-item (click)="changeStatus(payoutSessionStatus.Failed)">Failed</li>
+                </ul>
+            </nz-dropdown-menu>
+        </nz-space>
+    </nz-page-header-extra>
+    <nz-page-header-content *ngIf="(query | async)?.data?.payoutSession as data">
+        <nz-row nzType="flex" class="mb-4">
+            <nz-statistic nzTitle="Total Amount"
+                [nzValue]="(data.totalAmount | currency: data.currency) ?? 'N/A'"></nz-statistic>
+            <nz-statistic nzTitle="Paid Amount"
+                [nzValue]="(data.paidAmount[0].sum?.amount| currency: data.currency) ?? 'N/A'"
+                style="margin: 0 32px"></nz-statistic>
+            <nz-statistic nzTitle="Unpaid Amount"
+                [nzValue]="(data.unpaidAmount[0].sum?.amount | currency: data.currency) ?? 'N/A'"
+                style="margin: 0 32px"></nz-statistic>
+        </nz-row>
+        <div class=" mb-4" *ngFor="let payoutMethod of data.payoutMethods">
+            <nz-card nzSize="small">
+                <nz-page-header>
+                    <nz-avatar *ngIf="payoutMethod.media != null" nz-page-header-avatar
+                        [nzSrc]="serverUrl + payoutMethod.media.address"></nz-avatar>
+                    <nz-page-header-title>{{ payoutMethod.name }}</nz-page-header-title>
+                    <nz-page-header-extra>
+                        <nz-space *ngIf="payoutMethod.type == payoutMethodType.BankTransfer">
+                            <button *nzSpaceItem nz-button nzType="primary"
+                                [disabled]="getAmountToBePaid(data.amountToBePaidByPayoutMethod, payoutMethod.id) == 0"
+                                (click)="exportToCSV(payoutMethod.id)">Export to
+                                CSV</button>
+                        </nz-space>
+                        <nz-space *ngIf="payoutMethod.type == payoutMethodType.Stripe">
+                            <button *nzSpaceItem nz-button
+                                routerLink="https://dashboard.stripe.com/balance/overview">Add
+                                balance</button>
+                            <button *nzSpaceItem nz-button nzType="primary" (click)="payoutStripe(payoutMethod.id)"
+                                [nz-tooltip]="(getAmountToBePaid(data.amountToBePaidByPayoutMethod, payoutMethod.id)) > (payoutMethod.balance ?? 0) ? 'Insufficient balance' : ''"
+                                [disabled]="((getAmountToBePaid(data.amountToBePaidByPayoutMethod, payoutMethod.id)) > (payoutMethod.balance ?? 0) || 
+                            getAmountToBePaid(data.amountToBePaidByPayoutMethod, payoutMethod.id) == 0)">Payout</button>
+
+
+                        </nz-space>
+
+                    </nz-page-header-extra>
+                    <nz-page-header-content>
+                        <p nz-paragraph>
+                            {{ payoutMethod.description }}
+                        </p>
+                        <nz-descriptions nzSize="small" [nzColumn]="2">
+                            <nz-descriptions-item *ngIf="payoutMethod.balance"
+                                nzTitle="Account Balance">{{payoutMethod.balance | currency:
+                                payoutMethod.currency}}</nz-descriptions-item>
+                            <nz-descriptions-item
+                                nzTitle="Amount to be paid">{{getAmountToBePaid(data.amountToBePaidByPayoutMethod,
+                                payoutMethod.id) | currency:
+                                payoutMethod.currency}}</nz-descriptions-item>
+                        </nz-descriptions>
+                    </nz-page-header-content>
+
+                </nz-page-header>
+            </nz-card>
+        </div>
+        <nz-table #table nzShowSizeChanger [nzFrontPagination]="false"
+            *ngIf="(transactions | async)?.data?.payoutSession?.driverTransactions?.nodes as transactions"
+            [nzData]="transactions" [nzTotal]="transactions.length"
+            (nzQueryParams)="tableService.onTableQueryParamsChange($event)" nzBordered>
+            <thead>
+                <tr>
+                    <th>
+                        {{ 'profile.driver' | translate }}
+                    </th>
+                    <th>
+                        {{ 'profile.amount' | translate }}
+                    </th>
+                    <th>
+                        {{ 'profile.status' | translate }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of table.data" (click)="showPayoutDialog(data)">
+                    <td>
+                        <div class="flex flex-row items-center">
+                            <nz-avatar *ngIf="data.driver?.media != null"
+                                [nzSrc]="serverUrl + data.driver!.media!.address"></nz-avatar>
+                            <span class="ml-2">{{ data.driver?.firstName }} {{ data.driver?.lastName }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {{ data.amount | currency: data.currency }}
+                    </td>
+                    <td>
+                        <nz-tag *ngIf="data.status == transactionStatus.Processing" [nzColor]="'processing'"
+                            [nzBordered]="false">{{
+                            data.status
+                            }}</nz-tag>
+                        <nz-tag *ngIf="data.status == transactionStatus.Done" [nzColor]="'success'"
+                            [nzBordered]="false">{{ data.status
+                            }}</nz-tag>
+                        <nz-tag *ngIf="data.status == transactionStatus.Rejected" [nzColor]="'error'"
+                            [nzBordered]="false">{{ data.status
+                            }}</nz-tag>
+                        <nz-tag *ngIf="data.status == transactionStatus.Canceled" [nzColor]="'default'"
+                            [nzBordered]="false">{{ data.status
+                            }}</nz-tag>
+                </tr>
+            </tbody>
+        </nz-table>
+    </nz-page-header-content>
+
+</nz-page-header>
+<nz-modal [(nzVisible)]="payoutDialogVisible" (nzOnCancel)="payoutDialogVisible = false"
+    [nzOkDisabled]="payoutDialogData?.status == transactionStatus.Done" nzOkText="Save Payout information"
+    (nzOnOk)="saveManualPayout(payoutDialogData!.id)" [nzOkLoading]="payoutDialogLoading">
+    <div *nzModalTitle>
+        <div class="flex flex-row items-center"
+            *ngIf="payoutDialogData?.driver?.payoutAccounts?.nodes as payoutAccounts">
+            <nz-avatar *ngIf="payoutAccounts[0].payoutMethod?.media?.address" nz-page-header-avatar
+                [nzSrc]="serverUrl + payoutAccounts[0]!.payoutMethod.media?.address"></nz-avatar>
+            <span class="ml-2">{{payoutAccounts[0].payoutMethod.name}}</span>
+        </div>
+    </div>
+    <div *nzModalContent>
+        <nz-spin *ngIf="payoutDialogLoading" nzSize="large"></nz-spin>
+        <div *ngIf="!payoutDialogLoading">
+            <nz-descriptions [nzColumn]="1">
+                <nz-descriptions-item nzTitle="Amount">{{payoutDialogData?.amount | currency:
+                    payoutDialogData?.currency}}</nz-descriptions-item>
+                <nz-descriptions-item nzTitle="Status">
+                    <nz-tag *ngIf="payoutDialogData?.status == transactionStatus.Processing" [nzColor]="'processing'"
+                        [nzBordered]="false">{{payoutDialogData?.status}}</nz-tag>
+                    <nz-tag *ngIf="payoutDialogData?.status == transactionStatus.Done" [nzColor]="'success'"
+                        [nzBordered]="false">{{
+                        payoutDialogData?.status
+                        }}</nz-tag>
+                    <nz-tag *ngIf="payoutDialogData?.status == transactionStatus.Rejected" [nzColor]="'error'"
+                        [nzBordered]="false">{{payoutDialogData?.status}}</nz-tag>
+                    <nz-tag *ngIf="payoutDialogData?.status == transactionStatus.Canceled" [nzColor]="'default'"
+                        [nzBordered]="false">{{payoutDialogData?.status}}</nz-tag>
+                </nz-descriptions-item>
+            </nz-descriptions>
+            <div *ngIf="(payoutDialogData?.driver?.payoutAccounts?.nodes) as payoutAccounts">
+                <nz-descriptions *ngIf="payoutAccounts[0] as payoutAccount" [nzColumn]="1">
+                    <nz-descriptions-item nzTitle="Name">
+                        {{payoutAccount?.name}}
+                    </nz-descriptions-item>
+                    <nz-descriptions-item nzTitle="Account Number">
+                        {{payoutAccount?.accountNumber}}
+                    </nz-descriptions-item>
+                    <nz-descriptions-item nzTitle="Routing Number">
+                        {{payoutAccount?.routingNumber}}
+                    </nz-descriptions-item>
+
+                    <nz-descriptions-item nzTitle="Bank Name">
+                        {{payoutAccount?.bankName}}
+                    </nz-descriptions-item>
+                    <nz-descriptions-item nzTitle="Branch Name">
+                        {{payoutAccount?.branchName}}
+                    </nz-descriptions-item>
+                    <nz-descriptions-item nzTitle="Account Holder Name">
+                        {{payoutAccount?.accountHolderName}}
+                    </nz-descriptions-item>
+                    <nz-descriptions-item nzTitle="Account Holder Country">
+                        {{payoutAccount?.accountHolderCountry}}
+                    </nz-descriptions-item>
+                    <nz-descriptions-item nzTitle="Account Holder State">
+                        {{payoutAccount?.accountHolderState}}
+                    </nz-descriptions-item>
+                    <nz-descriptions-item nzTitle="Account Holder City">
+                        {{payoutAccount?.accountHolderCity}}
+                    </nz-descriptions-item>
+                    <nz-descriptions-item nzTitle="Account Holder Address">
+                        {{payoutAccount?.accountHolderAddress}}
+                    </nz-descriptions-item>
+                </nz-descriptions>
+            </div>
+            <form *ngIf="payoutDialogData?.status != transactionStatus.Done" nz-form
+                [formGroup]="formGroupManualPayout">
+                <nz-form-item>
+                    <nz-form-label nzRequired nzFor="transactionNumber">{{'profile.transactionNumber' |
+                        translate}}</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input id="transactionNumber" nzPlaceHolder="Transaction Number">
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                    <nz-form-label nzRequired nzFor="description">Description</nz-form-label>
+                    <nz-form-control>
+                        <textarea nz-input id="description" type="text" nzSize="large"
+                            nzPlaceHolder="Description"></textarea>
+                    </nz-form-control>
+                </nz-form-item>
+            </form>
+        </div>
+    </div>
+</nz-modal>

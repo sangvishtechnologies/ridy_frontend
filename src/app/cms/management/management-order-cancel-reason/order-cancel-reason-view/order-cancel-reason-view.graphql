@@ -1,0 +1,20 @@
+query OrderCancelReasonView($id: ID!) {
+  orderCancelReason(id: $id) {
+    id
+    title
+    userType
+    isEnabled
+  }
+}
+
+mutation UpdateOrderCancelReason($id: ID!, $update: OrderCancelReasonInput!) {
+  updateOneOrderCancelReason(input: { id: $id, update: $update }) {
+    id
+  }
+}
+
+mutation CreateOrderCancelReason($input: OrderCancelReasonInput!) {
+  createOneOrderCancelReason(input: { orderCancelReason: $input }) {
+    id
+  }
+}

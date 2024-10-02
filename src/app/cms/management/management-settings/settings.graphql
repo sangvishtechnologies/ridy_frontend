@@ -1,0 +1,19 @@
+mutation UpdatePassword($input: UpdatePasswordInput!) {
+  updatePassword(input: $input) {
+    id
+  }
+}
+
+query GetConfiguration {
+  currentConfiguration {
+    backendMapsAPIKey
+    adminPanelAPIKey
+  }
+}
+
+mutation UpdateConfig($input: UpdateConfigInput!) {
+  saveConfiguration(input: $input) {
+    backendMapsAPIKey
+    adminPanelAPIKey
+  }
+}

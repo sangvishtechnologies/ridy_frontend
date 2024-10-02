@@ -1,0 +1,23 @@
+query GiftBatchList($paging: OffsetPaging) {
+  giftBatches(paging: $paging) {
+    nodes {
+      id
+      name
+      currency
+      amount
+      availableFrom
+      expireAt
+      totalUsed: giftCodesAggregate(filter: { usedAt: { isNot: null } }) {
+        count {
+          id
+        }
+      }
+      totalUnused: giftCodesAggregate(filter: { usedAt: { is: null } }) {
+        count {
+          id
+        }
+      }
+    }
+    totalCount
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@org/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "nx serve",
+    "build": "nx build",
+    "test": "nx test"
+  },
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@angular-devkit/core": "~18.2.0",
+    "@nx/angular": "19.8.2",
+    "@nx/workspace": "19.8.2",
+    "nx": "19.8.2",
+    "typescript": "~5.5.2"
+  },
+  "nx": {
+    "includedScripts": []
+  }
+}

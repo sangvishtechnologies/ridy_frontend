@@ -1,0 +1,44 @@
+<nz-page-header [nzGhost]="false" nzBackIcon nzTitle="New Gift Card Batch"
+    nzSubtitle="Create and export a batch of gift cards">
+</nz-page-header>
+<nz-card [nzActions]="[tmplActions]" style="mt-16">
+    <form nz-form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="name">Name</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Invalid name">
+                <input nz-input formControlName="name" id="name" />
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="description">Currency</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Invalid currency">
+                <nz-select formControlName="currency" id="currency">
+                    <nz-option *ngFor="let currency of (route.data | async)?.query" [nzLabel]="currency"
+                        [nzValue]="currency"></nz-option>
+                </nz-select>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="amount">Amount</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Invalid amount">
+                <nz-input-number formControlName="amount" id="amount" [nzMin]="0" [nzMax]="1000000" [nzStep]="1">
+                </nz-input-number>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="dates">Availability Date</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Invalid date">
+                <nz-range-picker formControlName="dates" id="dates"></nz-range-picker>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="quantity">Quantity</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Invalid quantity">
+                <nz-slider formControlName="quantity" id="quantity" [nzMin]="1" [nzMax]="1000" [nzStep]="1"></nz-slider>
+            </nz-form-control>
+        </nz-form-item>
+        <ng-template #tmplActions>
+            <button nz-button nzType="primary" [disabled]="form.invalid" (click)="onSubmit()">Submit</button>
+        </ng-template>
+    </form>
+</nz-card>

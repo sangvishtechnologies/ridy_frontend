@@ -1,0 +1,6 @@
+mutation CreateGiftBach($input: CreateGiftBatchInput!) {
+  createGiftCardBatch(input: $input) {
+    id
+    name
+  }
+}

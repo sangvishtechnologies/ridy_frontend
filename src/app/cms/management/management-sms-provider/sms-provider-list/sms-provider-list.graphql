@@ -1,0 +1,11 @@
+query SMSProviders($paging: OffsetPaging) {
+  smsProviders(paging: $paging) {
+    nodes {
+      id
+      isDefault
+      name
+      type
+    }
+    totalCount
+  }
+}

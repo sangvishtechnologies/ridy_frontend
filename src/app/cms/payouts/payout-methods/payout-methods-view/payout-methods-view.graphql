@@ -1,0 +1,28 @@
+query ViewPayoutMethod($id: ID!) {
+  payoutMethod(id: $id) {
+    id
+    name
+    currency
+    description
+    type
+    privateKey
+    publicKey
+    saltKey
+    merchantId
+    media {
+      address
+    }
+  }
+}
+
+mutation CreatePayoutMethod($input: CreatePayoutMethodInput!) {
+  createOnePayoutMethod(input: { payoutMethod: $input }) {
+    id
+  }
+}
+
+mutation UpdatePayoutMethod($id: ID!, $update: CreatePayoutMethodInput!) {
+  updateOnePayoutMethod(input: { id: $id, update: $update }) {
+    id
+  }
+}

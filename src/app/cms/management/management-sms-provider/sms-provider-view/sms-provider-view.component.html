@@ -1,0 +1,80 @@
+<form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
+
+  <nz-page-header [nzGhost]="false" nzBackIcon nzTitle="SMS Provider"
+    nzSubtitle="Manage SMS providers for sending verification codes">
+    <nz-page-header-extra>
+      <nz-space>
+        <div *nzSpaceItem>
+          <button nz-button nzType="default" (click)="markAsDefault()"
+            *ngIf="(route.data | async)?.smsProvider?.isDefault === false">Mark
+            as default</button>
+        </div>
+        <button *nzSpaceItem nz-button nzType="primary" [disabled]="form.invalid" type="submit">
+          {{ 'profile.saveChanges' | translate }}
+
+        </button>
+      </nz-space>
+    </nz-page-header-extra>
+    <nz-page-header-content>
+      <input formControlName="id" type="hidden" hidden>
+      <div class="lg:grid lg:grid-cols-4 lg:gap-2">
+        <nz-form-item>
+          <nz-form-label nzRequired nzFor="name">Name</nz-form-label>
+          <nz-form-control>
+            <input nz-input required id="name" formControlName="name">
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label nzRequired nzFor="type">Type</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="type" id="type">
+              <nz-option *ngFor="let type of smsProviders" [nzValue]="type" [nzLabel]="type"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <h3 class="my-2 text-sm">API Keys</h3>
+      <div *ngIf="getProviderAPIRequirements(form.value.type) as apiKeyObject">
+        <div class="lg:grid lg:grid-cols-4 lg:gap-2">
+          <nz-form-item *ngIf="apiKeyObject.accountId">
+            <nz-form-label nzFor="accountId">{{apiKeyObject.accountId}}</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="accountId" id="accountId">
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item *ngIf="apiKeyObject.authToken">
+            <nz-form-label nzFor="authToken">{{apiKeyObject.authToken}}</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="authToken" id="authToken">
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item *ngIf="apiKeyObject.fromNumber">
+            <nz-form-label nzFor="fromNumber">{{apiKeyObject.fromNumber}}</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="fromNumber" id="fromNumber">
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item *ngIf="apiKeyObject.smsType">
+            <nz-form-label nzFor="smsType">{{apiKeyObject.smsType}}</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="smsType" id="smsType">
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item *ngIf="apiKeyObject.verificationTemplate">
+            <nz-form-label nzFor="verificationTemplate">{{apiKeyObject.verificationTemplate}}</nz-form-label>
+            <nz-form-control>
+              <input nz-input formControlName="verificationTemplate" id="verificationTemplate">
+            </nz-form-control>
+          </nz-form-item>
+
+        </div>
+        <nz-alert nzType="info" nzMessage="Verification code template" *ngIf="apiKeyObject.verificationTemplate"
+          nzDescription="Use the following variables in your template: {code} as placeholder for the verification code."
+          nzShowIcon></nz-alert>
+      </div>
+    </nz-page-header-content>
+    <button nz-button nzType="primary" class="float-right" type="submit" [disabled]="form.invalid">{{ 'profile.submit' |
+      translate
+      }}</button>
+  </nz-page-header>
+</form>

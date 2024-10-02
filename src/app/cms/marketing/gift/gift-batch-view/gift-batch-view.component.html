@@ -1,0 +1,50 @@
+<nz-page-header [nzGhost]="false" nzBackIcon nzTitle="Gift Batch" nzSubtitle="View and export a batch of gift cards">
+  <nz-page-header-extra>
+    <nz-button-group>
+      <button nz-button nzType="primary" (click)="exportToCsv()"><i nz-icon nzType="download"></i>Export to CSV</button>
+    </nz-button-group>
+  </nz-page-header-extra>
+  <nz-page-header-content>
+    <nz-descriptions *ngIf="$viewGiftCaster((route.data | async)?.giftBatch).data.giftBatch as giftBatch">
+      <nz-descriptions-item nzTitle="Name">{{giftBatch.name}}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Amount">{{giftBatch.amount | currency:giftBatch.currency}}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Availability Date Range">{{(giftBatch.availableFrom | date:'mediumDate') + ' - ' +
+        (giftBatch.expireAt | date:'mediumDate')}}</nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Batch usage">
+        <div nz-g2 [nzChartOptions]="{ height: 100, width: 500 }"
+          (nzChartInitialized)="onChartPayoutMethodsInit($event)">
+        </div>
+      </nz-descriptions-item>
+    </nz-descriptions>
+    <nz-table #table nzShowSizeChanger [nzFrontPagination]="false"
+      *ngIf="$giftListCaster((route.data | async)?.codeList).data.giftBatch.giftCodes as gifts" [nzData]="gifts.nodes"
+      [nzTotal]="gifts.totalCount" (nzQueryParams)="tableService.onTableQueryParamsChange($event)" nzBordered>
+      <thead>
+        <tr>
+          <th>{{ 'profile.code' | translate }}</th>
+          <th nzShowSort nzColumnKey="usedAt">{{ 'profile.status' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of table.data"
+          [routerLink]="data.riderTransaction?.riderId != null ? ('/riders/view/' + data.riderTransaction?.riderId) : (data.driverTransaction != null ? ('/drivers/view/' + data.driverTransaction.driverId) : null)">
+          <td>{{ data.code }}</td>
+          <td>
+            <div *ngIf="data.usedAt != null">
+              <div class="table-first-line" *ngIf="data.driverTransaction != null">
+                Used by {{ data.driverTransaction.driver?.firstName }} {{ data.driverTransaction.driver?.lastName }}
+              </div>
+              <div class="table-first-line" *ngIf="data.riderTransaction != null">
+                Used by {{ data.riderTransaction.rider.firstName }} {{ data.riderTransaction.rider.lastName }}
+              </div>
+              <div class="table-second-line" [nz-tooltip]="data.usedAt | date:'medium'">
+                at {{ data.usedAt | timeago }}
+              </div>
+            </div>
+            <nz-tag *ngIf="data.usedAt == null" nzColor="error" [nzBordered]="false">{{'Unused'}}</nz-tag>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-page-header-content>
+</nz-page-header>

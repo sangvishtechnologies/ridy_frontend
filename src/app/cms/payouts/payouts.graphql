@@ -1,0 +1,26 @@
+query Payouts($sessionsPaging: OffsetPaging!, $currency: String) {
+  supportedCurrencies
+  payoutStatistics(currency: $currency) {
+    pendingAmount
+    lastPayoutAmount
+    currency
+    usersDefaultPayoutMethodStats {
+      payoutMethod {
+        id
+        name
+      }
+      totalCount
+    }
+  }
+  payoutSessions(paging: $sessionsPaging) {
+    nodes {
+      id
+      createdAt
+      processedAt
+      status
+      totalAmount
+      currency
+    }
+    totalCount
+  }
+}

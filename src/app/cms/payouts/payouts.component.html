@@ -1,0 +1,81 @@
+<nz-page-header [nzGhost]="false" nzBackIcon nzTitle="Payouts"
+    nzSubtitle="Manage and track payouts for service providers" *ngIf="(query | async)?.data as data">
+    <nz-page-header-extra>
+        <span class="header-trigger" style="margin-right: 15px;">
+            <button nz-button nz-dropdown [nzDropdownMenu]="menu" [nzPlacement]="'bottomRight'">Actions<span nz-icon
+                    nzType="down"></span></button>
+            <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu>
+                    <li nz-menu-item routerLink="./new">New Payout Session</li>
+                    <li nz-submenu nzTitle="Change currency">
+                        <ul>
+                            <li nz-menu-item *ngFor="let currency of data.supportedCurrencies"
+                                (click)="changeCurrency(currency)">
+                                {{ currency }}
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </nz-dropdown-menu>
+        </span>
+    </nz-page-header-extra>
+    <nz-page-header-content>
+        <nz-row nzType="flex" class="mb-4">
+            <nz-statistic nzTitle="Pending"
+                [nzValue]="(data.payoutStatistics.pendingAmount | currency: data.payoutStatistics.currency) ?? 'N/A'"></nz-statistic>
+            <nz-statistic nzTitle="Last Payout"
+                [nzValue]="(data.payoutStatistics.lastPayoutAmount | currency: data.payoutStatistics.currency) ?? 'N/A'"
+                style="margin: 0 32px"></nz-statistic>
+            <nz-statistic nzTitle="Payout Methods" [nzValueTemplate]="payoutMethodTemplate"
+                style="margin: 0 32px"></nz-statistic>
+
+            <ng-template #payoutMethodTemplate>
+                <div nz-g2 [nzChartOptions]="{ height: 100, width: 500 }"
+                    (nzChartInitialized)="onChartPayoutMethodsInit($event)">
+                </div>
+            </ng-template>
+        </nz-row>
+
+        <nz-table #table nzShowSizeChanger [nzFrontPagination]="false" *ngIf="data.payoutSessions as sessions"
+            [nzData]="sessions.nodes" [nzTotal]="sessions.totalCount"
+            (nzQueryParams)="tableService.onTableQueryParamsChange($event)" nzBordered>
+            <thead>
+                <tr>
+                    <th>
+                        {{ 'profile.createdAt' | translate }}
+                    </th>
+                    <th>
+                        {{ 'profile.totalAmount' | translate }}
+                    </th>
+                    <th>
+                        {{ 'profile.status' | translate }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of table.data" class="group cursor-pointer" [routerLink]="data.id + '/view'">
+                    <td>
+                        {{ data.createdAt | timeago }}
+                    </td>
+                    <td>
+                        {{ data.totalAmount | currency: data.currency }}
+                    </td>
+                    <td>
+                        <nz-tag *ngIf="data.status == sessionStatus.Pending" [nzColor]="'blue'" [nzBordered]="false">{{
+                            data.status
+                            }}</nz-tag>
+                        <nz-tag *ngIf="data.status == sessionStatus.Paid" [nzColor]="'green'" [nzBordered]="false">{{
+                            data.status
+                            }}</nz-tag>
+                        <nz-tag *ngIf="data.status == sessionStatus.Failed" [nzColor]="'red'" [nzBordered]="false">{{
+                            data.status
+                            }}</nz-tag>
+                        <nz-tag *ngIf="data.status == sessionStatus.Cancelled" [nzColor]="'default'"
+                            [nzBordered]="false">{{ data.status
+                            }}</nz-tag>
+                    </td>
+                </tr>
+            </tbody>
+        </nz-table>
+    </nz-page-header-content>
+</nz-page-header>

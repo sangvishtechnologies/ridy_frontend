@@ -1,0 +1,13 @@
+query CreatePayoutSessionFields {
+  supportedCurrencies
+  payoutMethods {
+    id
+    name
+  }
+}
+
+mutation CreatePayoutSession($input: CreatePayoutSessionInput!) {
+  createPayoutSession(input: $input) {
+    id
+  }
+}

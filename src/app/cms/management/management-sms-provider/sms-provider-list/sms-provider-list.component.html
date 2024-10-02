@@ -1,0 +1,37 @@
+<nz-page-header [nzGhost]="false" nzBackIcon nzTitle="SMS Providers"
+  nzSubtitle="Manage SMS providers for sending verification codes">
+  <nz-page-header-extra>
+    <button nz-button nzType="primary" routerLink="new"><i nz-icon nzType="plus"></i>{{ 'profile.add' | translate
+      }}</button>
+  </nz-page-header-extra>
+  <nz-page-header-content>
+    <nz-table #table nzShowSizeChanger [nzFrontPagination]="false"
+      *ngIf="((route.data | async)?.smsProviders)?.data?.smsProviders as smsProviders" [nzData]="smsProviders.nodes"
+      [nzTotal]="smsProviders.totalCount" (nzQueryParams)="tableService.onTableQueryParamsChange($event)" nzBordered>
+      <thead>
+        <tr>
+          <th>
+            {{ 'profile.name' | translate }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of table.data" class="group cursor-pointer" [routerLink]="'view/' + data.id">
+          <td>
+            <div class="flex items-center ml-2">
+              <div>
+                <div>
+                  <span nz-typography class="mr-2">{{ data.name }} </span><nz-tag *ngIf="data.isDefault"
+                    nzColor="green">Default</nz-tag>
+                </div>
+                <div>
+                  <span nz-typography nzType="secondary">Provider: {{ data.type }}</span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-page-header-content>
+</nz-page-header>

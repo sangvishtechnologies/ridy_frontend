@@ -1,0 +1,124 @@
+query ViewPayoutSession($id: ID!) {
+  payoutSession(id: $id) {
+    id
+    currency
+    createdAt
+    processedAt
+    totalAmount
+    status
+    payoutMethods {
+      id
+      type
+      name
+      description
+      currency
+      balance
+      media {
+        address
+      }
+    }
+    driverTransactions {
+      nodes {
+        amount
+        currency
+        status
+        createdAt
+        driver {
+          firstName
+          lastName
+          media {
+            address
+          }
+        }
+      }
+    }
+    amountToBePaidByPayoutMethod: driverTransactionsAggregate(
+      filter: { status: { eq: Processing }, payoutSessionId: { eq: $id } }
+    ) {
+      groupBy {
+        payoutMethodId
+      }
+      sum {
+        amount
+      }
+    }
+    unpaidAmount: driverTransactionsAggregate(
+      filter: { status: { eq: Processing } }
+    ) {
+      sum {
+        amount
+      }
+    }
+    paidAmount: driverTransactionsAggregate(filter: { status: { eq: Done } }) {
+      sum {
+        amount
+      }
+    }
+  }
+}
+
+query PayooutSessionTransactions($id: ID!, $paging: OffsetPaging!) {
+  payoutSession(id: $id) {
+    driverTransactions(paging: $paging) {
+      nodes {
+        id
+        amount
+        currency
+        status
+        createdAt
+        driver {
+          firstName
+          lastName
+          media {
+            address
+          }
+          payoutAccounts(filter: { isDefault: { is: true } }) {
+            nodes {
+              id
+              name
+              type
+              accountNumber
+              routingNumber
+              bankName
+              branchName
+              accountHolderName
+              accountHolderCountry
+              accountHolderCity
+              accountHolderState
+              accountHolderZip
+              accountHolderAddress
+              accountHolderDateOfBirth
+              payoutMethod {
+                name
+                media {
+                  address
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation ExportToCSV($input: ExportSessionToCsvInput!) {
+  exportSessionToCsv(input: $input)
+}
+
+mutation RunAutoPayout($input: RunAutoPayoutInput!) {
+  runAutoPayout(input: $input)
+}
+
+mutation SaveManualPayoutItem($input: ManualPayoutInput!) {
+  manualPayout(input: $input) {
+    amount
+  }
+}
+
+mutation UpdatePayoutSession($id: ID!, $update: UpdatePayoutSessionInput!) {
+  updatePayoutSession(id: $id, input: $update) {
+    id
+    status
+  }
+}

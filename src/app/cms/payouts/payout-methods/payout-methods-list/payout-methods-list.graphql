@@ -1,0 +1,12 @@
+query PayoutMethods {
+  payoutMethods {
+    id
+    name
+    description
+    type
+    media {
+      id
+      address
+    }
+  }
+}

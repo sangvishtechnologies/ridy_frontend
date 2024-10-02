@@ -1,0 +1,50 @@
+query ViewGiftBatch($id: ID!) {
+  giftBatch(id: $id) {
+    id
+    name
+    amount
+    currency
+    availableFrom
+    expireAt
+    totalUsed: giftCodesAggregate(filter: { usedAt: { isNot: null } }) {
+      count {
+        id
+      }
+    }
+    totalUnused: giftCodesAggregate(filter: { usedAt: { is: null } }) {
+      count {
+        id
+      }
+    }
+  }
+}
+query GiftCodeList($giftBatchId: ID!, $paging: OffsetPaging!) {
+  giftBatch(id: $giftBatchId) {
+    giftCodes(paging: $paging) {
+      nodes {
+        id
+        code
+        usedAt
+        riderTransaction {
+          riderId
+          rider {
+            firstName
+            lastName
+          }
+        }
+        driverTransaction {
+          driverId
+          driver {
+            firstName
+            lastName
+          }
+        }
+      }
+      totalCount
+    }
+  }
+}
+
+mutation ExportGiftBatchToCSV($giftBatchId: ID!) {
+  exportGiftCardBatch(batchId: $giftBatchId)
+}
